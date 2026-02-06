@@ -1,40 +1,45 @@
 import { Request, Response } from "express";
-import { RawMaterialRepository } from "../repositories/RawMaterialRepository";
 import { RawMaterialService } from "../services/RawMaterialService";
-import { rawMaterialIdSchema } from "../validators/rawMaterialId.validator";
+import { RawMaterialRepository } from "../repositories/RawMaterialRepository";
 import { createRawMaterialSchema } from "../validators/createRawMaterial.validator";
+import { rawMaterialIdSchema } from "../validators/rawMaterialId.validator";
 
 export class RawMaterialController {
-  private rawMaterialService: RawMaterialService;
+  private service: RawMaterialService;
 
   constructor() {
-    const repository = new RawMaterialRepository();
-    this.rawMaterialService = new RawMaterialService(repository);
+    const repo = new RawMaterialRepository();
+    this.service = new RawMaterialService(repo);
   }
 
-  async getAll(_: Request, res: Response): Promise<Response> {
-    const materials = await this.rawMaterialService.getAll();
-    return res.json(materials);
+  async getAll(req: Request, res: Response): Promise<Response> {
+    try {
+      const materials = await this.service.getAll();
+      return res.status(200).json(materials);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 
   async getById(req: Request, res: Response): Promise<Response> {
     const parseResult = rawMaterialIdSchema.safeParse(req.params);
 
     if (!parseResult.success) {
-      return res.status(400).json({
-        message: "Invalid raw material id",
-      });
+      return res.status(400).json({ message: "Invalid raw material id" });
     }
 
     try {
-      const material = await this.rawMaterialService.getById(
-        parseResult.data.id,
-      );
-      return res.json(material);
-    } catch {
-      return res.status(404).json({
-        message: "Raw material not found",
-      });
+      const material = await this.service.getById(parseResult.data.id);
+
+      if (!material) {
+        return res.status(404).json({ message: "Raw material not found" });
+      }
+
+      return res.status(200).json(material);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
     }
   }
 
@@ -42,14 +47,15 @@ export class RawMaterialController {
     const parseResult = createRawMaterialSchema.safeParse(req.body);
 
     if (!parseResult.success) {
-      return res.status(400).json({
-        message: "Invalid request body",
-        errors: parseResult.error.format(),
-      });
+      return res.status(400).json({ message: "Invalid raw material data" });
     }
 
-    const material = await this.rawMaterialService.create(parseResult.data);
-
-    return res.status(201).json(material);
+    try {
+      const material = await this.service.create(parseResult.data);
+      return res.status(201).json(material);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 }

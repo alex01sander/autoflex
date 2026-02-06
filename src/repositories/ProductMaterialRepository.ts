@@ -25,4 +25,11 @@ export class ProductMaterialRepository {
       include: { rawMaterial: true },
     });
   }
+
+  async findById(id: number): Promise<ProductMaterialWithRaw | null> {
+    return prisma.productRawMaterial.findUnique({
+      where: { id },
+      include: { product: true, rawMaterial: true },
+    });
+  }
 }

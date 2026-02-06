@@ -21,7 +21,7 @@ export class ProductProductionController {
   ): Promise<Response> {
     try {
       const suggestions = await this.service.calculateProduction();
-      return res.json(suggestions);
+      return res.status(200).json(suggestions);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Error calculating production" });

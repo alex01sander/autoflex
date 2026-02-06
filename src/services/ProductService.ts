@@ -1,3 +1,5 @@
+import { ProductRepository } from "../repositories/ProductRepository";
+
 interface CreateProductDTO {
   code: string;
   name: string;
@@ -5,14 +7,16 @@ interface CreateProductDTO {
 }
 
 export class ProductService {
-  create(data: CreateProductDTO) {
-    const { code, name, price } = data;
+  private productRepository = new ProductRepository();
 
-    return {
-      id: 1,
-      code,
-      name,
-      price,
-    };
+  async create(data: CreateProductDTO) {
+    const existingProduct = await this.productRepository.findByCode(data.code);
+
+    if (existingProduct) {
+      throw new Error("Product code already exists");
+    }
+
+    const product = await this.productRepository.create(data);
+    return product;
   }
 }

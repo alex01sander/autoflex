@@ -1,6 +1,10 @@
 import { prisma } from "../database/prisma";
-import { ProductRawMaterial } from "@prisma/client"; // CORRETO
+import { ProductRawMaterial, RawMaterial } from "@prisma/client";
 import { CreateProductMaterialDTO } from "../validators/productMaterial.validator";
+
+export type ProductMaterialWithRaw = ProductRawMaterial & {
+  rawMaterial: RawMaterial;
+};
 
 export class ProductMaterialRepository {
   async create(data: CreateProductMaterialDTO): Promise<ProductRawMaterial> {
@@ -9,13 +13,13 @@ export class ProductMaterialRepository {
     });
   }
 
-  async findAll(): Promise<ProductRawMaterial[]> {
+  async findAll(): Promise<ProductMaterialWithRaw[]> {
     return prisma.productRawMaterial.findMany({
       include: { product: true, rawMaterial: true },
     });
   }
 
-  async findByProductId(productId: number): Promise<ProductRawMaterial[]> {
+  async findByProductId(productId: number): Promise<ProductMaterialWithRaw[]> {
     return prisma.productRawMaterial.findMany({
       where: { productId },
       include: { rawMaterial: true },

@@ -1,8 +1,10 @@
-import { Product } from "@prisma/client";
 import { prisma } from "../database/prisma";
+import { Product } from "@prisma/client";
 
 export class ProductRepository {
-  findAll(): Promise<Product[]> {
-    return prisma.product.findMany();
+  async findById(id: number): Promise<Product | null> {
+    return prisma.product.findUnique({
+      where: { id },
+    });
   }
 }

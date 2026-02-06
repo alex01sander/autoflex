@@ -1,10 +1,16 @@
-import { Product } from "@prisma/client";
 import { ProductRepository } from "../repositories/ProductRepository";
+import { Product } from "@prisma/client";
 
 export class ProductService {
-  private productRepository = new ProductRepository();
+  constructor(private readonly productRepository: ProductRepository) {}
 
-  findAll(): Promise<Product[]> {
-    return this.productRepository.findAll();
+  async getById(id: number): Promise<Product> {
+    const product = await this.productRepository.findById(id);
+
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    return product;
   }
 }

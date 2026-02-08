@@ -39,4 +39,32 @@ export class RawMaterialService {
   async create(data: CreateRawMaterialDTO): Promise<RawMaterial> {
     return this.rawMaterialRepository.create(data);
   }
+
+  async update(
+    id: number,
+    data: CreateRawMaterialDTO,
+  ): Promise<RawMaterial> {
+    const material = await this.rawMaterialRepository.findById(id);
+    if (!material) {
+      throw new Error("Raw material not found");
+    }
+    return this.rawMaterialRepository.update(id, data);
+  }
+
+  async delete(id: number): Promise<void> {
+    const material = await this.rawMaterialRepository.findById(id);
+    if (!material) {
+      throw new Error("Raw material not found");
+    }
+
+    const hasRelated =
+      await this.rawMaterialRepository.hasRelatedProducts(id);
+    if (hasRelated) {
+      throw new Error(
+        "Cannot delete raw material with related products. Delete the product materials first.",
+      );
+    }
+
+    await this.rawMaterialRepository.delete(id);
+  }
 }

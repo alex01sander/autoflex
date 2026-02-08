@@ -6,6 +6,11 @@ export const createProductMaterialSchema = z.object({
   requiredQuantity: z.number().int().positive(), // CORRIGIDO
 });
 
+export const updateProductMaterialSchema = createProductMaterialSchema;
+
 export type CreateProductMaterialDTO = z.infer<
   typeof createProductMaterialSchema
+>;
+export type UpdateProductMaterialDTO = z.infer<
+  typeof updateProductMaterialSchema
 >;

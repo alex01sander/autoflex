@@ -48,4 +48,20 @@ export class ProductMaterialRepository {
       include: { product: true, rawMaterial: true },
     });
   }
+
+  async update(
+    id: number,
+    data: CreateProductMaterialDTO,
+  ): Promise<ProductRawMaterial> {
+    return prisma.productRawMaterial.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async delete(id: number): Promise<ProductRawMaterial> {
+    return prisma.productRawMaterial.delete({
+      where: { id },
+    });
+  }
 }

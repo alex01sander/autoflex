@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { ProductService } from "../services/ProductService";
 import { ProductRepository } from "../repositories/ProductRepository";
 import { productIdSchema } from "../validators/productId.validator";
-import { createProductSchema } from "../validators/createProduct.validator";
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validators/createProduct.validator";
 import { paginationSchema } from "../validators/pagination.validator";
 
 export class ProductController {
@@ -58,6 +61,9 @@ export class ProductController {
       return res.status(200).json(product);
     } catch (error) {
       console.error(error);
+      if ((error as Error).message === "Product not found") {
+        return res.status(404).json({ message: "Product not found" });
+      }
       return res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -74,6 +80,60 @@ export class ProductController {
       return res.status(201).json(product);
     } catch (error) {
       console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async update(req: Request, res: Response): Promise<Response> {
+    const idParseResult = productIdSchema.safeParse(req.params);
+
+    if (!idParseResult.success) {
+      return res.status(400).json({ message: "Invalid product id" });
+    }
+
+    const bodyParseResult = updateProductSchema.safeParse(req.body);
+
+    if (!bodyParseResult.success) {
+      return res.status(400).json({
+        message: "Invalid product data",
+        errors: bodyParseResult.error.issues,
+      });
+    }
+
+    try {
+      const product = await this.productService.update(
+        idParseResult.data.id,
+        bodyParseResult.data,
+      );
+      return res.status(200).json(product);
+    } catch (error) {
+      console.error(error);
+      if ((error as Error).message === "Product not found") {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async delete(req: Request, res: Response): Promise<Response> {
+    const parseResult = productIdSchema.safeParse(req.params);
+
+    if (!parseResult.success) {
+      return res.status(400).json({ message: "Invalid product id" });
+    }
+
+    try {
+      await this.productService.delete(parseResult.data.id);
+      return res.status(204).send();
+    } catch (error) {
+      console.error(error);
+      const errorMessage = (error as Error).message;
+      if (errorMessage === "Product not found") {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      if (errorMessage.includes("Cannot delete product")) {
+        return res.status(400).json({ message: errorMessage });
+      }
       return res.status(500).json({ message: "Internal server error" });
     }
   }

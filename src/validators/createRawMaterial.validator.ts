@@ -6,4 +6,7 @@ export const createRawMaterialSchema = z.object({
   stockQuantity: z.number().int().nonnegative(),
 });
 
+export const updateRawMaterialSchema = createRawMaterialSchema;
+
 export type CreateRawMaterialDTO = z.infer<typeof createRawMaterialSchema>;
+export type UpdateRawMaterialDTO = z.infer<typeof updateRawMaterialSchema>;

@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { ProductMaterialRepository } from "../repositories/ProductMaterialRepository";
-import { CreateProductMaterialDTO } from "../validators/productMaterial.validator";
+import {
+  CreateProductMaterialDTO,
+  updateProductMaterialSchema,
+} from "../validators/productMaterial.validator";
 import { Prisma } from "@prisma/client";
 import { paginationSchema } from "../validators/pagination.validator";
 import { ProductMaterialService } from "../services/ProductMaterialService";
@@ -86,6 +89,57 @@ export class ProductMaterialController {
       return res
         .status(500)
         .json({ message: "Error creating product material" });
+    }
+  };
+
+  update = async (req: Request, res: Response): Promise<Response> => {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+
+    const parseResult = updateProductMaterialSchema.safeParse(req.body);
+
+    if (!parseResult.success) {
+      return res.status(400).json({
+        message: "Invalid product material data",
+        errors: parseResult.error.issues,
+      });
+    }
+
+    try {
+      const updated = await this.service.update(id, parseResult.data);
+      return res.status(200).json(updated);
+    } catch (error: unknown) {
+      console.error(error);
+      if ((error as Error).message === "Product material not found") {
+        return res.status(404).json({ message: "Product material not found" });
+      }
+      return res
+        .status(500)
+        .json({ message: "Error updating product material" });
+    }
+  };
+
+  delete = async (req: Request, res: Response): Promise<Response> => {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+
+    try {
+      await this.service.delete(id);
+      return res.status(204).send();
+    } catch (error: unknown) {
+      console.error(error);
+      if ((error as Error).message === "Product material not found") {
+        return res.status(404).json({ message: "Product material not found" });
+      }
+      return res
+        .status(500)
+        .json({ message: "Error deleting product material" });
     }
   };
 }

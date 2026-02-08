@@ -36,4 +36,24 @@ export class ProductRepository {
   async create(data: CreateProductDTO) {
     return prisma.product.create({ data });
   }
+
+  async update(id: number, data: CreateProductDTO): Promise<Product> {
+    return prisma.product.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async delete(id: number): Promise<Product> {
+    return prisma.product.delete({
+      where: { id },
+    });
+  }
+
+  async hasRelatedMaterials(id: number): Promise<boolean> {
+    const count = await prisma.productRawMaterial.count({
+      where: { productId: id },
+    });
+    return count > 0;
+  }
 }

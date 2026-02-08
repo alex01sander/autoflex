@@ -41,4 +41,28 @@ export class ProductService {
   async create(data: CreateProductDTO) {
     return this.productRepository.create(data);
   }
+
+  async update(id: number, data: CreateProductDTO): Promise<Product> {
+    const product = await this.productRepository.findById(id);
+    if (!product) {
+      throw new Error("Product not found");
+    }
+    return this.productRepository.update(id, data);
+  }
+
+  async delete(id: number): Promise<void> {
+    const product = await this.productRepository.findById(id);
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    const hasRelated = await this.productRepository.hasRelatedMaterials(id);
+    if (hasRelated) {
+      throw new Error(
+        "Cannot delete product with related materials. Delete the materials first.",
+      );
+    }
+
+    await this.productRepository.delete(id);
+  }
 }

@@ -62,6 +62,6 @@ export class ProductProductionService {
       }
     }
 
-    return suggestions;
+    return suggestions.sort((a, b) => b.totalValue - a.totalValue);
   }
 }

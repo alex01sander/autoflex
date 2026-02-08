@@ -32,4 +32,23 @@ export class ProductMaterialService {
   async getByProductId(productId: number): Promise<ProductRawMaterial[]> {
     return this.repository.findByProductId(productId);
   }
+
+  async update(
+    id: number,
+    data: CreateProductMaterialDTO,
+  ): Promise<ProductRawMaterial> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      throw new Error("Product material not found");
+    }
+    return this.repository.update(id, data);
+  }
+
+  async delete(id: number): Promise<void> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      throw new Error("Product material not found");
+    }
+    await this.repository.delete(id);
+  }
 }

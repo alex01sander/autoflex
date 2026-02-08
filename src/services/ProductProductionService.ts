@@ -16,35 +16,49 @@ export class ProductProductionService {
   ) {}
 
   async calculateProduction(): Promise<ProductionSuggestion[]> {
-    const products = (await this.productRepo.findAll()).sort(
+
+    const allProducts = await this.productRepo.findAll();
+
+    
+    const products = allProducts.sort(
       (a, b) => Number(b.price) - Number(a.price),
     );
 
     const suggestions: ProductionSuggestion[] = [];
 
     for (const product of products) {
-      const materials = await this.productMaterialRepo.findByProductId(
-        product.id,
-      );
+      try {
+        
+        const materials = await this.productMaterialRepo.findByProductId(
+          product.id,
+        );
 
-      const maxPerMaterial = materials.map((mat) =>
-        Math.floor(
-          Number(mat.rawMaterial.stockQuantity) / Number(mat.requiredQuantity),
-        ),
-      );
+        if (!materials || materials.length === 0) continue;
 
-      const maxQuantity = maxPerMaterial.length
-        ? Math.min(...maxPerMaterial)
-        : 0;
-
-      if (maxQuantity > 0) {
-        suggestions.push({
-          productId: product.id,
-          name: product.name,
-          maxQuantity,
-          unitPrice: Number(product.price),
-          totalValue: Number(product.price) * maxQuantity,
+        const maxPerMaterial = materials.map((mat) => {
+          const stock = Number(mat.rawMaterial.stockQuantity);
+          const required = Number(mat.requiredQuantity);
+          return required > 0 ? Math.floor(stock / required) : 0;
         });
+
+        const maxQuantity = Math.min(...maxPerMaterial);
+
+        if (maxQuantity > 0) {
+          suggestions.push({
+            productId: product.id,
+            name: product.name,
+            maxQuantity,
+            unitPrice: Number(product.price),
+            totalValue: Number(product.price) * maxQuantity,
+          });
+        }
+        
+      } catch (error) {
+        
+        console.error(
+          `Skipped product ${product.id} due to a repository error.`,
+        );
+        continue;
       }
     }
 

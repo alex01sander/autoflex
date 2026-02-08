@@ -19,6 +19,22 @@ export class ProductMaterialRepository {
     });
   }
 
+  async findAllPaginated(
+    skip: number,
+    take: number,
+  ): Promise<{ data: ProductMaterialWithRaw[]; total: number }> {
+    const [data, total] = await Promise.all([
+      prisma.productRawMaterial.findMany({
+        skip,
+        take,
+        include: { product: true, rawMaterial: true },
+      }),
+      prisma.productRawMaterial.count(),
+    ]);
+
+    return { data, total };
+  }
+
   async findByProductId(productId: number): Promise<ProductMaterialWithRaw[]> {
     return prisma.productRawMaterial.findMany({
       where: { productId },

@@ -15,6 +15,24 @@ export class ProductRepository {
     });
   }
 
+  async findAllPaginated(
+    skip: number,
+    take: number,
+  ): Promise<{ data: Product[]; total: number }> {
+    const [data, total] = await Promise.all([
+      prisma.product.findMany({
+        skip,
+        take,
+        orderBy: {
+          id: "asc",
+        },
+      }),
+      prisma.product.count(),
+    ]);
+
+    return { data, total };
+  }
+
   async create(data: CreateProductDTO) {
     return prisma.product.create({ data });
   }

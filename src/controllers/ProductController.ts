@@ -3,6 +3,7 @@ import { ProductService } from "../services/ProductService";
 import { ProductRepository } from "../repositories/ProductRepository";
 import { productIdSchema } from "../validators/productId.validator";
 import { createProductSchema } from "../validators/createProduct.validator";
+import { paginationSchema } from "../validators/pagination.validator";
 
 export class ProductController {
   private productService: ProductService;
@@ -14,6 +15,24 @@ export class ProductController {
 
   async getAll(req: Request, res: Response): Promise<Response> {
     try {
+      
+      if (req.query.page || req.query.limit) {
+        const parseResult = paginationSchema.safeParse(req.query);
+
+        if (!parseResult.success) {
+          return res.status(400).json({
+            message: "Invalid pagination parameters",
+            errors: parseResult.error.issues,
+          });
+        }
+
+        const { page, limit } = parseResult.data;
+        const paginatedProducts =
+          await this.productService.getAllPaginated(page, limit);
+        return res.status(200).json(paginatedProducts);
+      }
+
+        
       const products = await this.productService.getAll();
       return res.status(200).json(products);
     } catch (error) {

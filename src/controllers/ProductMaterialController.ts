@@ -2,12 +2,16 @@ import { Request, Response } from "express";
 import { ProductMaterialRepository } from "../repositories/ProductMaterialRepository";
 import { CreateProductMaterialDTO } from "../validators/productMaterial.validator";
 import { Prisma } from "@prisma/client";
+import { paginationSchema } from "../validators/pagination.validator";
+import { ProductMaterialService } from "../services/ProductMaterialService";
 
 export class ProductMaterialController {
   private repository: ProductMaterialRepository;
+  private service: ProductMaterialService;
 
   constructor() {
     this.repository = new ProductMaterialRepository();
+    this.service = new ProductMaterialService(this.repository);
   }
 
   private isPrismaError(
@@ -16,8 +20,26 @@ export class ProductMaterialController {
     return (error as Prisma.PrismaClientKnownRequestError)?.code !== undefined;
   }
 
-  getAll = async (_req: Request, res: Response): Promise<Response> => {
+  getAll = async (req: Request, res: Response): Promise<Response> => {
     try {
+      
+      if (req.query.page || req.query.limit) {
+        const parseResult = paginationSchema.safeParse(req.query);
+
+        if (!parseResult.success) {
+          return res.status(400).json({
+            message: "Invalid pagination parameters",
+            errors: parseResult.error.issues,
+          });
+        }
+
+        const { page, limit } = parseResult.data;
+        const paginatedItems =
+          await this.service.getAllPaginated(page, limit);
+        return res.status(200).json(paginatedItems);
+      }
+
+      
       const items = await this.repository.findAll();
       return res.status(200).json(items);
     } catch (error: unknown) {

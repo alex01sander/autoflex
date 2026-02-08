@@ -3,6 +3,7 @@ import { RawMaterialService } from "../services/RawMaterialService";
 import { RawMaterialRepository } from "../repositories/RawMaterialRepository";
 import { createRawMaterialSchema } from "../validators/createRawMaterial.validator";
 import { rawMaterialIdSchema } from "../validators/rawMaterialId.validator";
+import { paginationSchema } from "../validators/pagination.validator";
 
 export class RawMaterialController {
   private service: RawMaterialService;
@@ -14,6 +15,24 @@ export class RawMaterialController {
 
   async getAll(req: Request, res: Response): Promise<Response> {
     try {
+      
+      if (req.query.page || req.query.limit) {
+        const parseResult = paginationSchema.safeParse(req.query);
+
+        if (!parseResult.success) {
+          return res.status(400).json({
+            message: "Invalid pagination parameters",
+            errors: parseResult.error.issues,
+          });
+        }
+
+        const { page, limit } = parseResult.data;
+        const paginatedMaterials =
+          await this.service.getAllPaginated(page, limit);
+        return res.status(200).json(paginatedMaterials);
+      }
+
+      
       const materials = await this.service.getAll();
       return res.status(200).json(materials);
     } catch (error) {

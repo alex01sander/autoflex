@@ -15,6 +15,22 @@ export class RawMaterialRepository {
     });
   }
 
+  async findAllPaginated(
+    skip: number,
+    take: number,
+  ): Promise<{ data: RawMaterial[]; total: number }> {
+    const [data, total] = await Promise.all([
+      prisma.rawMaterial.findMany({
+        skip,
+        take,
+        orderBy: { id: "asc" },
+      }),
+      prisma.rawMaterial.count(),
+    ]);
+
+    return { data, total };
+  }
+
   async create(data: CreateRawMaterialDTO): Promise<RawMaterial> {
     return prisma.rawMaterial.create({
       data,

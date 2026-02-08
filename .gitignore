@@ -11,7 +11,7 @@ dist/
 .env.production
 
 # Prisma
-/src/generated/prisma
+src/generated/prisma
 prisma/migrations/.migration_state
 
 # IDE

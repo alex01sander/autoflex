@@ -52,26 +52,15 @@ export function ProductMaterials() {
     return production?.maxQuantity || 0;
   }, [productionItems, selectedProductId]);
 
-  // Calcular custos
+  // Totalizadores
   const totals = useMemo(() => {
-    let custoTotal = 0;
-    
-    filteredMaterials.forEach((item) => {
-      // Como não temos custo unitário da matéria-prima no banco,
-      // vamos usar um valor simbólico baseado no estoque
-      custoTotal += item.requiredQuantity * 1; // Placeholder para custo
-    });
-
-    const custoUnitario = productYield > 0 ? custoTotal / productYield : 0;
     const precoVenda = selectedProduct?.price || 0;
 
     return {
-      custoTotal,
-      custoUnitario,
       rendimento: productYield,
       precoVenda,
     };
-  }, [filteredMaterials, productYield, selectedProduct]);
+  }, [productYield, selectedProduct]);
 
   async function handleCreate() {
     if (!selectedProductId) {
@@ -248,18 +237,10 @@ export function ProductMaterials() {
             <CardTitle className="text-lg">Totalizadores</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-slate-50 rounded-lg p-4">
-                <p className="text-sm text-slate-500">Custo Total</p>
-                <p className="text-xl font-semibold">R$ {totals.custoTotal.toFixed(2)}</p>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="bg-slate-50 rounded-lg p-4">
                 <p className="text-sm text-slate-500">Rendimento</p>
                 <p className="text-xl font-semibold">{totals.rendimento} un</p>
-              </div>
-              <div className="bg-slate-50 rounded-lg p-4">
-                <p className="text-sm text-slate-500">Custo Unitário</p>
-                <p className="text-xl font-semibold">R$ {totals.custoUnitario.toFixed(2)}</p>
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
                 <p className="text-sm text-slate-500">Preço de Venda</p>

@@ -15,24 +15,13 @@ export class ProductProductionService {
     private productMaterialRepo: ProductMaterialRepository,
   ) {}
 
-  async calculateProduction(): Promise<ProductionSuggestion[]> {
-
+  async calculatePossibleProduction(): Promise<ProductionSuggestion[]> {
     const allProducts = await this.productRepo.findAll();
-
-    
-    const products = allProducts.sort(
-      (a, b) => Number(b.price) - Number(a.price),
-    );
-
     const suggestions: ProductionSuggestion[] = [];
 
-    for (const product of products) {
+    for (const product of allProducts) {
       try {
-        
-        const materials = await this.productMaterialRepo.findByProductId(
-          product.id,
-        );
-
+        const materials = await this.productMaterialRepo.findByProductId(product.id);
         if (!materials || materials.length === 0) continue;
 
         const maxPerMaterial = materials.map((mat) => {
@@ -52,12 +41,60 @@ export class ProductProductionService {
             totalValue: Number(product.price) * maxQuantity,
           });
         }
-        
       } catch (error) {
-        
-        console.error(
-          `Skipped product ${product.id} due to a repository error.`,
-        );
+        console.error(`Skipped product ${product.id} due to a repository error.`, error);
+        continue;
+      }
+    }
+
+    return suggestions.sort((a, b) => b.totalValue - a.totalValue);
+  }
+
+  async calculateSuggestedProduction(): Promise<ProductionSuggestion[]> {
+    const allProducts = await this.productRepo.findAll();
+    
+    // Prioriza produtos de maior valor
+    const products = allProducts.sort((a, b) => Number(b.price) - Number(a.price));
+
+    const suggestions: ProductionSuggestion[] = [];
+    
+    // Controle de estoque virtual
+    const virtualStock: Record<number, number> = {};
+
+    for (const product of products) {
+      try {
+        const materials = await this.productMaterialRepo.findByProductId(product.id);
+        if (!materials || materials.length === 0) continue;
+
+        // Inicializa ou pega estoque virtual
+        const maxPerMaterial = materials.map((mat) => {
+          if (virtualStock[mat.rawMaterialId] === undefined) {
+            virtualStock[mat.rawMaterialId] = Number(mat.rawMaterial.stockQuantity);
+          }
+          
+          const stock = virtualStock[mat.rawMaterialId];
+          const required = Number(mat.requiredQuantity);
+          return required > 0 ? Math.floor(stock / required) : 0;
+        });
+
+        const maxQuantity = Math.min(...maxPerMaterial);
+
+        if (maxQuantity > 0) {
+          suggestions.push({
+            productId: product.id,
+            name: product.name,
+            maxQuantity,
+            unitPrice: Number(product.price),
+            totalValue: Number(product.price) * maxQuantity,
+          });
+
+          // Consome estoque virtualmente
+          materials.forEach((mat) => {
+            virtualStock[mat.rawMaterialId] -= maxQuantity * Number(mat.requiredQuantity);
+          });
+        }
+      } catch (error) {
+        console.error(`Skipped product ${product.id} due to a repository error.`, error);
         continue;
       }
     }
@@ -65,3 +102,4 @@ export class ProductProductionService {
     return suggestions.sort((a, b) => b.totalValue - a.totalValue);
   }
 }
+

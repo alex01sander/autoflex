@@ -5,5 +5,6 @@ const router = Router();
 const controller = new ProductProductionController();
 
 router.get("/", controller.getProductionSuggestion.bind(controller));
+router.get("/possible", controller.getPossibleProduction.bind(controller));
 
 export default router;

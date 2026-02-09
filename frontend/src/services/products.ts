@@ -21,3 +21,12 @@ export async function createProduct(product: Omit<Product, "id">) {
   const { data } = await api.post("/products", product);
   return data;
 }
+
+export async function updateProduct(id: number, product: Omit<Product, "id">) {
+  const { data } = await api.put(`/products/${id}`, product);
+  return data;
+}
+
+export async function deleteProduct(id: number) {
+  await api.delete(`/products/${id}`);
+}

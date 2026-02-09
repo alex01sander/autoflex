@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { RootState, AppDispatch } from "@/store";
-import { fetchProducts, addProduct } from "@/store/productsSlice";
+import { fetchProducts, addProduct, editProduct, removeProduct } from "@/store/productsSlice";
+import type { Product } from "@/types/product";
 
 export function Products() {
   const products = useSelector((state: RootState) => state.products.items);
@@ -17,6 +18,12 @@ export function Products() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editCode, setEditCode] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
 
   async function handleCreate() {
     try {
@@ -30,6 +37,40 @@ export function Products() {
       toast.success("Produto cadastrado com sucesso!");
     } catch {
       toast.error("Erro ao cadastrar produto.");
+    }
+  }
+
+  function handleOpenEdit(product: Product) {
+    setEditingProduct(product);
+    setEditCode(product.code);
+    setEditName(product.name);
+    setEditPrice(String(product.price));
+    setEditDialogOpen(true);
+  }
+
+  async function handleUpdate() {
+    if (!editingProduct) return;
+    try {
+      await dispatch(editProduct({
+        id: editingProduct.id,
+        product: { code: editCode, name: editName, price: Number(editPrice) },
+      })).unwrap();
+
+      setEditDialogOpen(false);
+      setEditingProduct(null);
+
+      toast.success("Produto atualizado com sucesso!");
+    } catch {
+      toast.error("Erro ao atualizar produto.");
+    }
+  }
+
+  async function handleDelete(id: number) {
+    try {
+      await dispatch(removeProduct(id)).unwrap();
+      toast.success("Produto excluído com sucesso!");
+    } catch (error) {
+      toast.error(typeof error === "string" ? error : "Erro ao excluir produto.");
     }
   }
 
@@ -62,20 +103,17 @@ export function Products() {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
               />
-
               <Input
                 placeholder="Nome"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-
               <Input
                 placeholder="Preço"
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
-
               <Button
                 className="w-full bg-blue-600 hover:bg-blue-700"
                 onClick={handleCreate}
@@ -87,6 +125,39 @@ export function Products() {
         </Dialog>
       </div>
 
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Produto</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <Input
+              placeholder="Código"
+              value={editCode}
+              onChange={(e) => setEditCode(e.target.value)}
+            />
+            <Input
+              placeholder="Nome"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+            <Input
+              placeholder="Preço"
+              type="number"
+              value={editPrice}
+              onChange={(e) => setEditPrice(e.target.value)}
+            />
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              onClick={handleUpdate}
+            >
+              Atualizar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="bg-white rounded-lg border">
         <Table>
           <TableHeader>
@@ -94,6 +165,7 @@ export function Products() {
               <TableHead>Código</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>Preço</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -105,12 +177,28 @@ export function Products() {
                 <TableCell>
                   R$ {Number(product.price).toFixed(2)}
                 </TableCell>
+                <TableCell className="text-right space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpenEdit(product)}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(product.id)}
+                  >
+                    Excluir
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
 
             {products.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-slate-500">
+                <TableCell colSpan={4} className="text-center text-slate-500">
                   Nenhum produto cadastrado
                 </TableCell>
               </TableRow>

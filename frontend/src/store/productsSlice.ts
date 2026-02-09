@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getProducts, createProduct } from "@/services/products";
+import { getProducts, createProduct, updateProduct, deleteProduct } from "@/services/products";
 import type { Product } from "@/types/product";
 
 export const fetchProducts = createAsyncThunk("products/fetchAll", async () => {
@@ -12,6 +12,31 @@ export const addProduct = createAsyncThunk(
     const created = await createProduct(product);
     dispatch(fetchProducts());
     return created;
+  }
+);
+
+export const editProduct = createAsyncThunk(
+  "products/edit",
+  async ({ id, product }: { id: number; product: Omit<Product, "id"> }, { dispatch }) => {
+    const updated = await updateProduct(id, product);
+    dispatch(fetchProducts());
+    return updated;
+  }
+);
+
+export const removeProduct = createAsyncThunk(
+  "products/remove",
+  async (id: number, { dispatch, rejectWithValue }) => {
+    try {
+      await deleteProduct(id);
+      dispatch(fetchProducts());
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        return rejectWithValue(axiosError.response?.data?.message || "Erro ao excluir produto.");
+      }
+      return rejectWithValue("Erro ao excluir produto.");
+    }
   }
 );
 

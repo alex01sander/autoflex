@@ -11,7 +11,7 @@ import type { RootState, AppDispatch } from "@/store";
 import { fetchProductMaterials, addProductMaterial, editProductMaterial, removeProductMaterial } from "@/store/productMaterialsSlice";
 import { fetchProducts } from "@/store/productsSlice";
 import { fetchRawMaterials } from "@/store/rawMaterialsSlice";
-import { fetchProduction } from "@/store/productionSlice";
+import { fetchProduction, fetchPossibleProduction } from "@/store/productionSlice";
 import type { ProductMaterial } from "@/types/productMaterial";
 
 export function ProductMaterials() {
@@ -78,6 +78,7 @@ export function ProductMaterials() {
       setDialogOpen(false);
       toast.success("Matéria-prima adicionada com sucesso!");
       dispatch(fetchProduction());
+      dispatch(fetchPossibleProduction());
     } catch {
       toast.error("Erro ao adicionar matéria-prima.");
     }
@@ -105,6 +106,7 @@ export function ProductMaterials() {
       setEditing(null);
       toast.success("Matéria-prima atualizada com sucesso!");
       dispatch(fetchProduction());
+      dispatch(fetchPossibleProduction());
     } catch {
       toast.error("Erro ao atualizar matéria-prima.");
     }
@@ -125,6 +127,7 @@ export function ProductMaterials() {
     dispatch(fetchProducts());
     dispatch(fetchRawMaterials());
     dispatch(fetchProduction());
+    dispatch(fetchPossibleProduction());
   }, [dispatch]);
 
   return (

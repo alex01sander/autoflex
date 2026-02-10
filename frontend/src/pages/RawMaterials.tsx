@@ -96,7 +96,7 @@ export function RawMaterials() {
             <div className="space-y-4">
               <Input placeholder="Código" value={code} onChange={(e) => setCode(e.target.value)} />
               <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} />
-              <Input placeholder="Qtd. Estoque" type="number" value={stockQuantity} onChange={(e) => setStockQuantity(e.target.value)} />
+              <Input placeholder="Quantidade em estoque" type="number" value={stockQuantity} onChange={(e) => setStockQuantity(e.target.value)} />
               <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleCreate}>
                 Salvar
               </Button>
@@ -114,7 +114,7 @@ export function RawMaterials() {
           <div className="space-y-4">
             <Input placeholder="Código" value={editCode} onChange={(e) => setEditCode(e.target.value)} />
             <Input placeholder="Nome" value={editName} onChange={(e) => setEditName(e.target.value)} />
-            <Input placeholder="Qtd. Estoque" type="number" value={editStockQuantity} onChange={(e) => setEditStockQuantity(e.target.value)} />
+            <Input placeholder="Quantidade em estoque" type="number" value={editStockQuantity} onChange={(e) => setEditStockQuantity(e.target.value)} />
             <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleUpdate}>
               Atualizar
             </Button>
@@ -128,7 +128,7 @@ export function RawMaterials() {
             <TableRow>
               <TableHead>Código</TableHead>
               <TableHead>Nome</TableHead>
-              <TableHead>Qtd. Estoque</TableHead>
+              <TableHead>Quantidade em estoque</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -163,3 +163,4 @@ export function RawMaterials() {
     </div>
   );
 }
+

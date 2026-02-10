@@ -33,9 +33,9 @@ export const removeRawMaterial = createAsyncThunk(
     } catch (error: unknown) {
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as { response?: { data?: { message?: string } } };
-        return rejectWithValue(axiosError.response?.data?.message || "Erro ao excluir matéria-prima.");
+        return rejectWithValue(axiosError.response?.data?.message || "Error deleting raw material.");
       }
-      return rejectWithValue("Erro ao excluir matéria-prima.");
+      return rejectWithValue("Error deleting raw material.");
     }
   }
 );

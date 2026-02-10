@@ -33,9 +33,9 @@ export const removeProductMaterial = createAsyncThunk(
     } catch (error: unknown) {
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as { response?: { data?: { message?: string } } };
-        return rejectWithValue(axiosError.response?.data?.message || "Erro ao excluir associação.");
+        return rejectWithValue(axiosError.response?.data?.message || "Error deleting association.");
       }
-      return rejectWithValue("Erro ao excluir associação.");
+      return rejectWithValue("Error deleting association.");
     }
   }
 );

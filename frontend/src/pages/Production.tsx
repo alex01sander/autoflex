@@ -3,14 +3,29 @@ import { useSelector, useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RootState, AppDispatch } from "@/store";
-import { fetchProduction, fetchPossibleProduction } from "@/store/productionSlice";
+import {
+  fetchProduction,
+  fetchPossibleProduction,
+} from "@/store/productionSlice";
+import { formatCurrencyBRL } from "@/lib/utils";
 
 export function Production() {
-  const suggestedItems = useSelector((state: RootState) => state.production.items);
-  const possibleItems = useSelector((state: RootState) => state.production.possibleItems);
+  const suggestedItems = useSelector(
+    (state: RootState) => state.production.items,
+  );
+  const possibleItems = useSelector(
+    (state: RootState) => state.production.possibleItems,
+  );
   const loading = useSelector((state: RootState) => state.production.loading);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -18,7 +33,7 @@ export function Production() {
     try {
       await Promise.all([
         dispatch(fetchProduction()).unwrap(),
-        dispatch(fetchPossibleProduction()).unwrap()
+        dispatch(fetchPossibleProduction()).unwrap(),
       ]);
       toast.success("Capacidades atualizadas!");
     } catch {
@@ -47,12 +62,14 @@ export function Production() {
         </Button>
       </div>
 
-      {/* 1. Produção Possível (Análise de Capacidade) */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-blue-700">1. Produção Possível (Análise de Capacidade)</CardTitle>
+          <CardTitle className="text-lg text-blue-700">
+            1. Produção Possível (Análise de Capacidade)
+          </CardTitle>
           <p className="text-sm text-slate-500">
-            Quantidade máxima que cada produto pode produzir isoladamente com o estoque atual.
+            Quantidade máxima que cada produto pode produzir isoladamente com o
+            estoque atual.
           </p>
         </CardHeader>
         <CardContent>
@@ -62,7 +79,7 @@ export function Production() {
                 <TableRow>
                   <TableHead>Produto</TableHead>
                   <TableHead>Capacidade Máxima</TableHead>
-                  <TableHead>Preço Unit.</TableHead>
+                  <TableHead>Preço Unitário</TableHead>
                   <TableHead>Valor Potencial</TableHead>
                 </TableRow>
               </TableHeader>
@@ -71,13 +88,16 @@ export function Production() {
                   <TableRow key={item.productId}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.maxQuantity} unidades</TableCell>
-                    <TableCell>R$ {item.unitPrice.toFixed(2)}</TableCell>
-                    <TableCell>R$ {item.totalValue.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrencyBRL(item.unitPrice)}</TableCell>
+                    <TableCell>{formatCurrencyBRL(item.totalValue)}</TableCell>
                   </TableRow>
                 ))}
                 {possibleItems.length === 0 && !loading && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-slate-500 py-4">
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-slate-500 py-4"
+                    >
                       Nenhum produto pode ser produzido com o estoque atual.
                     </TableCell>
                   </TableRow>
@@ -88,12 +108,14 @@ export function Production() {
         </CardContent>
       </Card>
 
-      {/* 2. Produção Sugerida (Otimização de Estoque) */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-green-700">2. Produção Sugerida (Otimização)</CardTitle>
+          <CardTitle className="text-lg text-green-700">
+            2. Produção Sugerida (Otimização)
+          </CardTitle>
           <p className="text-sm text-slate-500">
-            Sugestão de produção priorizando produtos de maior valor e consumindo estoque progressivamente.
+            Sugestão de produção priorizando produtos de maior valor e
+            consumindo o estoque progressivamente.
           </p>
         </CardHeader>
         <CardContent>
@@ -102,8 +124,8 @@ export function Production() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Produto</TableHead>
-                  <TableHead>Qtd. Sugerida</TableHead>
-                  <TableHead>Preço Unit.</TableHead>
+                  <TableHead>Quantidade Sugerida</TableHead>
+                  <TableHead>Preço Unitário</TableHead>
                   <TableHead>Valor Total</TableHead>
                 </TableRow>
               </TableHeader>
@@ -112,14 +134,17 @@ export function Production() {
                   <TableRow key={item.productId}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.maxQuantity} unidades</TableCell>
-                    <TableCell>R$ {item.unitPrice.toFixed(2)}</TableCell>
-                    <TableCell>R$ {item.totalValue.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrencyBRL(item.unitPrice)}</TableCell>
+                    <TableCell>{formatCurrencyBRL(item.totalValue)}</TableCell>
                   </TableRow>
                 ))}
                 {suggestedItems.length === 0 && !loading && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-slate-500 py-4">
-                      Nenhuma sugestão disponível para o estoque atual.
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-slate-500 py-4"
+                    >
+                      Não há sugestões disponíveis para o estoque atual.
                     </TableCell>
                   </TableRow>
                 )}
@@ -131,4 +156,3 @@ export function Production() {
     </div>
   );
 }
-

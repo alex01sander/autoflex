@@ -21,7 +21,7 @@ export function Sidebar() {
             `${linkClass} ${isActive ? activeClass : ""}`
           }
         >
-          Produtos
+          Products
         </NavLink>
 
         <NavLink
@@ -30,7 +30,7 @@ export function Sidebar() {
             `${linkClass} ${isActive ? activeClass : ""}`
           }
         >
-          Matérias-primas
+          Raw Materials
         </NavLink>
 
         <NavLink
@@ -39,7 +39,7 @@ export function Sidebar() {
             `${linkClass} ${isActive ? activeClass : ""}`
           }
         >
-          Composição do Produto
+          Product Composition
         </NavLink>
 
         <NavLink
@@ -48,8 +48,9 @@ export function Sidebar() {
             `${linkClass} ${isActive ? activeClass : ""}`
           }
         >
-          Produção
+          Production
         </NavLink>
+
       </nav>
     </aside>
   );

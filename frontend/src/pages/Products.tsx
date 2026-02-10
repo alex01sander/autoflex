@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { formatCurrencyBRL } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -174,9 +175,7 @@ export function Products() {
               <TableRow key={product.id}>
                 <TableCell>{product.code}</TableCell>
                 <TableCell>{product.name}</TableCell>
-                <TableCell>
-                  R$ {Number(product.price).toFixed(2)}
-                </TableCell>
+                <TableCell>{formatCurrencyBRL(Number(product.price))}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
                     variant="outline"
@@ -209,3 +208,4 @@ export function Products() {
     </div>
   );
 }
+
